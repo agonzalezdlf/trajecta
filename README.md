@@ -1,20 +1,44 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Trajecta - Personalized Career Roadmap AI
 
-# Run and deploy your AI Studio app
+Trajecta is a high-end educational platform that uses AI to generate personalized career roadmaps, perform skills gap analysis, and suggest priority focus areas.
 
-This contains everything you need to run your app locally.
+## Deployment Instructions
 
-View your app in AI Studio: https://ai.studio/apps/eeea0402-52fc-45ea-a424-482b5b8e3baf
+### 1. GitHub Configuration
 
-## Run Locally
+- Push the repository to GitHub.
+- Ensure all source files are included.
 
-**Prerequisites:**  Node.js
+### 2. Vercel Deployment
 
+When deploying to Vercel, you need to configure your Environment Variables:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. Go to your **Project Settings** in the Vercel Dashboard.
+2. Select **Environment Variables**.
+3. Add the following key:
+   - **Key**: `GEMINI_API_KEY`
+   - **Value**: Your Google Gemini API Key (get one at [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)).
+4. (Optional) For a production database, you might want to switch from SQLite to an external database like PostgreSQL, but for prototypes, SQLite is fine (note: Vercel's ephemeral filesystem means SQLite data will reset on every deploy).
+
+### 3. Local Development
+
+To run the project locally:
+
+1. Clone the repository.
+2. Install dependencies: `npm install`.
+3. Create a `.env` file based on `.env.example` and add your `GEMINI_API_KEY`.
+4. Start the development server: `npm run dev`.
+
+## Responsiveness
+
+The application is designed to be fully responsive:
+- **Mobile**: Optimized for touch interaction and quick progress tracking.
+- **Tablet**: Expanded layouts with sidebars and larger cards.
+- **Computer**: Full bento-box grid layouts for deep career analysis.
+
+## Features
+
+- **AI Roadmap Generation**: Custom-built paths based on your specific goals.
+- **Skills Gap Analysis**: Intelligent assessment of your current strengths and weaknesses.
+- **Social Network**: Connect with mentors and see community progress.
+- **High-End Aesthetic**: Designed to match professional presentation standards with grainy gradients and glassmorphism.

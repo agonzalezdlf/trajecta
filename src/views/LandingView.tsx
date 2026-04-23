@@ -46,9 +46,14 @@ const LandingView = () => {
               <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
                 <div className="flex -space-x-3">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className={`w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center text-white text-xs font-bold shadow-lg
+                    <div key={i} className={`w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 overflow-hidden shadow-lg
                       ${i === 1 ? 'bg-primary' : i === 2 ? 'bg-accent-purple' : i === 3 ? 'bg-accent-blue' : 'bg-accent-green'}`}>
-                      {String.fromCharCode(64 + i)}
+                      <img 
+                        src={`https://picsum.photos/seed/hero${i}/100/100`} 
+                        alt="User" 
+                        className="w-full h-full object-cover" 
+                        referrerPolicy="no-referrer" 
+                      />
                     </div>
                   ))}
                 </div>

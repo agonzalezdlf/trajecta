@@ -41,14 +41,14 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
   const streak = roadmap.streak?.current || 0;
 
   return (
-    <div className="max-w-md mx-auto min-h-screen pb-24">
+    <div className="max-w-4xl mx-auto min-h-screen pb-24 px-4 md:px-8">
       {/* Header */}
-      <div className="sticky top-0 z-50 flex items-center bg-white/40 dark:bg-black/40 backdrop-blur-xl p-4 pb-2 justify-between border-b border-white/20">
+      <div className="sticky top-0 z-50 flex items-center bg-white/40 dark:bg-black/40 backdrop-blur-xl p-4 md:p-6 mb-6 rounded-2xl justify-between border border-white/20 mt-4">
         <div className="flex items-center gap-2">
           <div className="bg-primary p-1.5 rounded-lg text-white">
             <Rocket size={18} strokeWidth={2.5} />
           </div>
-          <h2 className="text-lg font-black tracking-tighter text-slate-900 dark:text-slate-100 italic">TRAJECTA</h2>
+          <h2 className="text-lg md:text-xl font-black tracking-tighter text-slate-900 dark:text-slate-100 italic">TRAJECTA</h2>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
@@ -61,190 +61,216 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
         </div>
       </div>
 
-      {/* Profile Section */}
-      <div className="flex p-8 flex-col items-center gap-6">
-        <div className="relative">
-          <div className="w-28 h-28 rounded-[2.5rem] bg-gradient-to-br from-primary/20 to-accent-purple/20 flex items-center justify-center text-primary shadow-xl ring-4 ring-white dark:ring-slate-800">
-             <User size={48} strokeWidth={1.5} />
-          </div>
-          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1.5 border-4 border-white dark:border-slate-800 shadow-lg">
-            <ShieldCheck size={16} />
-          </div>
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">{user.email.split('@')[0]}</p>
-          <div className="mt-1 flex items-center gap-2 justify-center">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-            <p className="text-primary font-black uppercase text-[10px] tracking-widest">{roadmap.goal}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Level Progress & Streak Milestone */}
-      <div className="px-4 flex flex-col gap-3">
-        <Card className="p-4 flex flex-col gap-3">
-          <div className="flex justify-between items-center">
-            <p className="text-sm font-semibold">Progress to Next Level</p>
-            <p className="text-primary text-xs font-bold bg-primary/10 px-2 py-1 rounded-full">450/1000 XP</p>
-          </div>
-          <div className="h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-            <div className="h-full rounded-full bg-primary" style={{ width: "45%" }}></div>
-          </div>
-        </Card>
-
-        {streak > 0 && streak % 7 === 0 && (
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-gradient-to-r from-orange-500 to-primary p-4 rounded-2xl text-white shadow-lg flex items-center gap-4"
-          >
-            <div className="bg-white/20 p-2 rounded-xl">
-              <Star size={24} className="fill-white" />
-            </div>
-            <div>
-              <p className="font-black text-sm uppercase tracking-wider">Streak Milestone!</p>
-              <p className="text-xs text-white/80">{streak} days of consistent growth. You're unstoppable!</p>
-            </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Skills Gap Analysis Preview */}
-      {roadmap.skillGapAnalysis && (
-        <div className="px-4 mt-4">
-          <Card className="p-4 border-l-4 border-l-primary bg-primary/5">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <Brain size={18} className="text-primary" />
-                <h3 className="font-bold text-sm">Skills Gap Analysis</h3>
+      <div className="grid lg:grid-cols-12 gap-8">
+        {/* Left Column: Profile & Summary */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          {/* Profile Section */}
+          <Card className="flex p-8 flex-col items-center gap-6 rounded-[2.5rem] border-none bg-white/50 backdrop-blur-sm shadow-xl">
+            <div className="relative">
+              <div className="w-28 h-28 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-primary/20 to-accent-purple/20 shadow-xl ring-4 ring-white dark:ring-slate-800">
+                 <img 
+                   src={`https://picsum.photos/seed/${user.email}/200/200`} 
+                   alt="User Avatar" 
+                   className="w-full h-full object-cover" 
+                   referrerPolicy="no-referrer" 
+                 />
               </div>
-              <button 
-                onClick={() => setShowGapAnalysis(true)}
-                className="text-primary text-[10px] font-bold uppercase tracking-widest hover:underline"
-              >
-                View Report
-              </button>
+              <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1.5 border-4 border-white dark:border-slate-800 shadow-lg">
+                <ShieldCheck size={16} />
+              </div>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
-              {roadmap.skillGapAnalysis.summary}
-            </p>
+            <div className="text-center">
+              <p className="text-2xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">{user.email.split('@')[0]}</p>
+              <div className="mt-1 flex items-center gap-2 justify-center">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <p className="text-primary font-black uppercase text-[10px] tracking-widest">{roadmap.goal}</p>
+              </div>
+            </div>
           </Card>
-        </div>
-      )}
 
-      {/* Roadmap Path */}
-      <div className="flex flex-col items-center py-10 relative">
-        {/* Start Node */}
-        <div className="z-10 flex flex-col items-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-lg ring-4 ring-primary/20">
-            <Flag size={20} />
+          {/* Level Progress & Streak Milestone */}
+          <div className="flex flex-col gap-3">
+            <Card className="p-6 flex flex-col gap-4 rounded-3xl border-none bg-white shadow-lg">
+              <div className="flex justify-between items-center">
+                <p className="text-sm font-black uppercase tracking-widest text-slate-400">Next Level</p>
+                <p className="text-primary text-xs font-black bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">450/1000 XP</p>
+              </div>
+              <div className="h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: "45%" }}
+                  className="h-full rounded-full bg-primary shadow-sm shadow-primary/20"
+                />
+              </div>
+            </Card>
+
+            {streak > 0 && streak % 7 === 0 && (
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-gradient-to-r from-orange-500 to-primary p-6 rounded-3xl text-white shadow-xl flex items-center gap-4"
+              >
+                <div className="bg-white/20 p-2.5 rounded-xl">
+                  <Star size={24} className="fill-white" />
+                </div>
+                <div>
+                  <p className="font-black text-sm uppercase tracking-wider italic">Streak Milestone!</p>
+                  <p className="text-xs text-white/80 font-medium leading-relaxed">{streak} days of consistent growth. You're unstoppable!</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Skills Gap Analysis Preview */}
+            {roadmap.skillGapAnalysis && (
+              <Card className="p-6 border-none bg-primary/5 rounded-3xl">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-2">
+                    <Brain size={20} className="text-primary" />
+                    <h3 className="font-black text-xs uppercase tracking-widest text-slate-600">Gap Analysis</h3>
+                  </div>
+                  <button 
+                    onClick={() => setShowGapAnalysis(true)}
+                    className="text-primary text-[10px] font-black uppercase tracking-widest hover:underline"
+                  >
+                    Details
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  {roadmap.skillGapAnalysis.summary}
+                </p>
+              </Card>
+            )}
           </div>
-          <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Start</span>
         </div>
 
-        {roadmap.phases.map((phase, phaseIdx) => (
-          <div key={phase.id} className="flex flex-col items-center w-full">
-            {/* Path Line */}
-            <div className={cn(
-              "w-1 h-16 my-1",
-              phase.status === "completed" ? "bg-primary" : 
-              phase.status === "in_progress" ? "bg-gradient-to-b from-primary to-slate-200" : 
-              "bg-slate-200 dark:bg-slate-800"
-            )} />
-
-            {/* Phase Node */}
-            <div className="z-10 flex flex-col items-center gap-3">
-              {phase.status === "completed" ? (
-                <div className="group relative">
-                  <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-xl rotate-3 transform transition-transform group-hover:rotate-0">
-                    <MessageSquare size={36} className="-rotate-3 group-hover:rotate-0 transition-transform" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-background-light dark:border-background-dark">
-                    <Check size={16} strokeWidth={3} />
-                  </div>
+        {/* Right Column: Roadmap Path */}
+        <div className="lg:col-span-8">
+          <Card className="p-4 md:p-8 rounded-[2.5rem] border-none bg-white/30 backdrop-blur-sm shadow-xl min-h-600">
+            <div className="flex flex-col items-center py-6 relative">
+              {/* Start Node */}
+              <div className="z-10 flex flex-col items-center gap-2">
+                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg ring-8 ring-primary/10">
+                  <Flag size={24} />
                 </div>
-              ) : phase.status === "in_progress" ? (
-                <div className="relative">
-                  <div className="w-24 h-24 rounded-full border-4 border-slate-200 dark:border-slate-800 flex items-center justify-center relative bg-white dark:bg-slate-900 shadow-2xl">
-                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Brain size={40} />
-                    </div>
-                    {/* Progress Ring Simulation */}
-                    <svg className="absolute inset-0 w-full h-full -rotate-90">
-                      <circle 
-                        cx="48" cy="48" r="46" 
-                        fill="transparent" 
-                        stroke="currentColor" 
-                        strokeWidth="4" 
-                        className="text-primary"
-                        strokeDasharray={2 * Math.PI * 46}
-                        strokeDashoffset={2 * Math.PI * 46 * (1 - 0.65)}
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute -bottom-2 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-lg left-1/2 -translate-x-1/2 whitespace-nowrap">
-                    In Progress
-                  </div>
-                </div>
-              ) : (
-                <div className="w-20 h-20 rounded-3xl bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-slate-500 shadow-inner opacity-60 grayscale">
-                  <Lock size={36} />
-                </div>
-              )}
-
-              <div className="text-center px-6">
-                <p className={cn("font-bold text-sm", phase.status === "locked" && "text-slate-500")}>{phase.title}</p>
-                {phase.status === "completed" && <p className="text-green-600 text-[10px] font-bold uppercase tracking-wider">Completed</p>}
-                {phase.status === "in_progress" && <p className="text-slate-500 text-[10px] font-medium">65% Mastered</p>}
-                {phase.status === "locked" && <p className="text-slate-400 text-[10px] font-medium uppercase tracking-widest">Locked</p>}
+                <span className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase mt-2">Mission Start</span>
               </div>
 
-              {/* Modules List (if in progress) */}
-              {phase.status === "in_progress" && (
-                <div className="w-full px-4 mt-4 flex flex-col gap-2">
-                  {phase.modules.map(module => (
-                    <button 
-                      key={module.id}
-                      onClick={() => setSelectedModule(module)}
-                      className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border border-primary/10 shadow-sm hover:border-primary/30 transition-all text-left"
-                    >
-                      <div className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center",
-                        module.completed ? "bg-green-100 text-green-600" : "bg-primary/10 text-primary"
-                      )}>
-                        {module.completed ? <Check size={20} /> : <PlayCircle size={20} />}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold">{module.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex-1 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: `${module.progress}%` }} />
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-medium">{module.progress}%</span>
-                        </div>
-                      </div>
-                      <ChevronRight size={16} className="text-slate-300" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+              {roadmap.phases.map((phase, phaseIdx) => (
+                <div key={phase.id} className="flex flex-col items-center w-full">
+                  {/* Path Line */}
+                  <div className={cn(
+                    "w-1.5 h-20 my-1",
+                    phase.status === "completed" ? "bg-primary" : 
+                    phase.status === "in_progress" ? "bg-gradient-to-b from-primary to-slate-100" : 
+                    "bg-slate-100"
+                  )} />
 
-        {/* Goal Node */}
-        <div className="z-10 flex flex-col items-center gap-4 py-12">
-          <div className="w-1 h-16 bg-slate-200 dark:bg-slate-800 mb-2" />
-          <div className="w-24 h-24 rounded-full border-4 border-dashed border-primary/40 flex items-center justify-center bg-white dark:bg-slate-900 relative">
-            <Star size={40} className="text-primary/30" />
-            <div className="absolute -top-4">
-              <Star size={32} className="text-primary fill-primary" />
+                  {/* Phase Node container - responsive layout */}
+                  <div className="z-10 flex flex-col md:flex-row items-center gap-6 w-full px-4 md:px-12 max-w-2xl">
+                    <div className="shrink-0">
+                      {phase.status === "completed" ? (
+                        <div className="group relative">
+                          <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-xl rotate-3 transform transition-transform group-hover:rotate-0">
+                            <MessageSquare size={36} className="-rotate-3 group-hover:rotate-0 transition-transform" />
+                          </div>
+                          <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-white">
+                            <Check size={16} strokeWidth={3} />
+                          </div>
+                        </div>
+                      ) : phase.status === "in_progress" ? (
+                        <div className="relative">
+                          <div className="w-24 h-24 rounded-full border-4 border-slate-100 flex items-center justify-center relative bg-white shadow-2xl">
+                            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              <Brain size={40} />
+                            </div>
+                            <svg className="absolute inset-0 w-full h-full -rotate-90">
+                              <circle 
+                                cx="48" cy="48" r="46" 
+                                fill="transparent" 
+                                stroke="currentColor" 
+                                strokeWidth="4" 
+                                className="text-primary shadow-sm"
+                                strokeDasharray={2 * Math.PI * 46}
+                                strokeDashoffset={2 * Math.PI * 46 * (1 - 0.65)}
+                              />
+                            </svg>
+                          </div>
+                          <div className="absolute -bottom-2 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-lg left-1/2 -translate-x-1/2 whitespace-nowrap italic">
+                            Active
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-300 shadow-inner opacity-60">
+                          <Lock size={36} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 text-center md:text-left">
+                      <p className={cn("font-black text-lg uppercase italic tracking-tight", phase.status === "locked" ? "text-slate-300" : "text-slate-900")}>
+                        {phase.title}
+                      </p>
+                      <div className="mt-1">
+                        {phase.status === "completed" && <p className="text-green-500 text-[10px] font-black uppercase tracking-widest">Mastery Achieved</p>}
+                        {phase.status === "in_progress" && <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">65% COMPLETE</p>}
+                        {phase.status === "locked" && <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">Awaiting Access</p>}
+                      </div>
+                      
+                      {/* Modules list integrated into the roadmap view on desktop */}
+                      {phase.status === "in_progress" && (
+                        <div className="mt-6 flex flex-col gap-3 w-full">
+                          {phase.modules.map(module => (
+                            <button 
+                              key={module.id}
+                              onClick={() => setSelectedModule(module)}
+                              className="flex items-center gap-4 p-4 bg-white/50 backdrop-blur-sm rounded-2xl border-none shadow-md hover:shadow-lg transition-all group w-full"
+                            >
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                                module.completed ? "bg-green-100 text-green-600" : "bg-primary text-white"
+                              )}>
+                                {module.completed ? <Check size={20} /> : <PlayCircle size={20} />}
+                              </div>
+                              <div className="flex-1 overflow-hidden">
+                                <p className="text-xs font-black uppercase tracking-tight truncate">{module.title}</p>
+                                <div className="flex items-center gap-3 mt-1.5 text-slate-400">
+                                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                      <div className="h-full bg-primary" style={{ width: `${module.progress}%` }} />
+                                   </div>
+                                   <span className="text-[10px] font-black truncate">{module.progress}%</span>
+                                </div>
+                              </div>
+                              <ChevronRight size={18} className="text-slate-300 group-hover:text-primary transition-colors" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Goal Node */}
+              <div className="z-10 flex flex-col items-center gap-4 py-16">
+                <div className="w-1.5 h-20 bg-slate-100 mb-2" />
+                <div className="w-28 h-28 rounded-full border-4 border-dashed border-primary/20 flex items-center justify-center bg-white relative shadow-2xl">
+                  <Star size={48} className="text-primary/10" />
+                  <div className="absolute -top-6">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <Star size={40} className="text-primary fill-primary shadow-xl" />
+                    </motion.div>
+                  </div>
+                </div>
+                <div className="text-center mt-4">
+                  <h3 className="text-primary font-black text-2xl tracking-tighter uppercase italic">{roadmap.goal}</h3>
+                  <p className="text-slate-400 text-xs font-black uppercase tracking-widest mt-2">Target reached: Oct 2024</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="text-center">
-            <h3 className="text-primary font-black text-lg tracking-tight uppercase">Goal: {roadmap.goal}</h3>
-            <p className="text-slate-400 text-xs">Estimated completion: Oct 2024</p>
-          </div>
+          </Card>
         </div>
       </div>
 

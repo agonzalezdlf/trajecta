@@ -29,75 +29,77 @@ export async function generateRoadmap(data: OnboardingData): Promise<UserRoadmap
     Return the roadmap in JSON format matching the UserRoadmap interface.
   `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          goal: { type: Type.STRING },
-          careerReadinessScore: { type: Type.NUMBER },
-          skillGapAnalysis: {
-            type: Type.OBJECT,
-            properties: {
-              summary: { type: Type.STRING },
-              strengths: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    skill: { type: Type.STRING },
-                    isStrength: { type: Type.BOOLEAN },
-                    description: { type: Type.STRING }
-                  }
-                }
-              },
-              gaps: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    skill: { type: Type.STRING },
-                    isStrength: { type: Type.BOOLEAN },
-                    description: { type: Type.STRING }
-                  }
-                }
-              }
-            }
-          },
-          phases: {
-            type: Type.ARRAY,
-            items: {
+  try {
+    const response = await ai.models.generateContent({
+      model: "models/gemini-3-flash-preview",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            goal: { type: Type.STRING },
+            careerReadinessScore: { type: Type.NUMBER },
+            skillGapAnalysis: {
               type: Type.OBJECT,
               properties: {
-                id: { type: Type.STRING },
-                title: { type: Type.STRING },
-                description: { type: Type.STRING },
-                status: { type: Type.STRING, enum: ["completed", "in_progress", "locked"] },
-                milestone: { type: Type.STRING },
-                modules: {
+                summary: { type: Type.STRING },
+                strengths: {
                   type: Type.ARRAY,
                   items: {
                     type: Type.OBJECT,
                     properties: {
-                      id: { type: Type.STRING },
-                      title: { type: Type.STRING },
-                      description: { type: Type.STRING },
-                      progress: { type: Type.NUMBER },
-                      completed: { type: Type.BOOLEAN },
-                      tasks: {
-                        type: Type.ARRAY,
-                        items: {
-                          type: Type.OBJECT,
-                          properties: {
-                            id: { type: Type.STRING },
-                            title: { type: Type.STRING },
-                            description: { type: Type.STRING },
-                            duration: { type: Type.STRING },
-                            type: { type: Type.STRING, enum: ["lesson", "exercise", "simulation", "quiz", "action"] },
-                            completed: { type: Type.BOOLEAN }
+                      skill: { type: Type.STRING },
+                      isStrength: { type: Type.BOOLEAN },
+                      description: { type: Type.STRING }
+                    }
+                  }
+                },
+                gaps: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      skill: { type: Type.STRING },
+                      isStrength: { type: Type.BOOLEAN },
+                      description: { type: Type.STRING }
+                    }
+                  }
+                }
+              }
+            },
+            phases: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  status: { type: Type.STRING, enum: ["completed", "in_progress", "locked"] },
+                  milestone: { type: Type.STRING },
+                  modules: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        id: { type: Type.STRING },
+                        title: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        progress: { type: Type.NUMBER },
+                        completed: { type: Type.BOOLEAN },
+                        tasks: {
+                          type: Type.ARRAY,
+                          items: {
+                            type: Type.OBJECT,
+                            properties: {
+                              id: { type: Type.STRING },
+                              title: { type: Type.STRING },
+                              description: { type: Type.STRING },
+                              duration: { type: Type.STRING },
+                              type: { type: Type.STRING, enum: ["lesson", "exercise", "simulation", "quiz", "action"] },
+                              completed: { type: Type.BOOLEAN }
+                            }
                           }
                         }
                       }
@@ -105,56 +107,91 @@ export async function generateRoadmap(data: OnboardingData): Promise<UserRoadmap
                   }
                 }
               }
-            }
-          },
-          skillTracks: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                id: { type: Type.STRING },
-                title: { type: Type.STRING },
-                level: { type: Type.NUMBER },
-                progress: { type: Type.NUMBER }
+            },
+            skillTracks: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  level: { type: Type.NUMBER },
+                  progress: { type: Type.NUMBER }
+                }
               }
-            }
-          },
-          badges: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                id: { type: Type.STRING },
-                label: { type: Type.STRING },
-                description: { type: Type.STRING },
-                unlocked: { type: Type.BOOLEAN },
-                type: { type: Type.STRING, enum: ["technical", "soft_skill", "foundation"] }
+            },
+            badges: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  label: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  unlocked: { type: Type.BOOLEAN },
+                  type: { type: Type.STRING, enum: ["technical", "soft_skill", "foundation"] }
+                }
               }
             }
           }
         }
       }
+    });
+
+    const roadmap = JSON.parse(response.text || "{}") as UserRoadmap;
+    
+    // Ensure we have some default badges if none generated
+    if (!roadmap.badges || roadmap.badges.length === 0) {
+      roadmap.badges = [
+        { id: "b1", label: "Foundations", description: "Completed basic orientation", unlocked: true, type: "foundation" },
+        { id: "b2", label: "Early Adopter", description: "Signed up for Trajecta", unlocked: true, type: "foundation" },
+        { id: "b3", label: "Skill Builder", description: "Reached Level 2 in any skill", unlocked: false, type: "technical" },
+      ];
     }
-  });
+    
+    // Initialize streak
+    roadmap.streak = {
+      current: 0,
+      best: 0,
+      lastCompletedDate: null,
+      milestonesReached: []
+    };
 
-  const roadmap = JSON.parse(response.text || "{}") as UserRoadmap;
-  
-  // Ensure we have some default badges if none generated
-  if (!roadmap.badges || roadmap.badges.length === 0) {
-    roadmap.badges = [
-      { id: "b1", label: "Foundations", description: "Completed basic orientation", unlocked: true, type: "foundation" },
-      { id: "b2", label: "Early Adopter", description: "Signed up for Trajecta", unlocked: true, type: "foundation" },
-      { id: "b3", label: "Skill Builder", description: "Reached Level 2 in any skill", unlocked: false, type: "technical" },
-    ];
+    return roadmap;
+  } catch (error) {
+    console.error("Gemini API Error (generateRoadmap):", error);
+    throw error;
   }
-  
-  // Initialize streak
-  roadmap.streak = {
-    current: 0,
-    best: 0,
-    lastCompletedDate: null,
-    milestonesReached: []
-  };
+}
 
-  return roadmap;
+export async function suggestFocusAreas(goal: string, motivation: string): Promise<string[]> {
+  const prompt = `
+    Based on the following career goal and motivation, suggest 8-10 specific focus areas or skills that the user should prioritize.
+    Goal: ${goal}
+    Motivation/Background: ${motivation}
+
+    Return the result as a JSON array of strings.
+    Example: ["Cloud Architecture", "Team Leadership", "Go Programming", "System Design"]
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "models/gemini-3-flash-preview",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.STRING
+          }
+        }
+      }
+    });
+
+    return JSON.parse(response.text || "[]") as string[];
+  } catch (error) {
+    console.error("Gemini API Error (suggestFocusAreas):", error);
+    throw error;
+  }
 }

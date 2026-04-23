@@ -5,7 +5,7 @@ import { Card } from "../components/Card";
 import { ArrowLeft, ArrowRight, Mic, Info, Upload, Link as LinkIcon, Sparkles, Rocket } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { OnboardingData, UserRoadmap } from "../types";
-import { generateRoadmap } from "../services/gemini";
+import { generateRoadmap, suggestFocusAreas } from "../services/gemini";
 import { cn } from "../lib/utils";
 
 interface OnboardingViewProps {
@@ -16,6 +16,8 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [loadingInterests, setLoadingInterests] = useState(false);
+  const [suggestedInterests, setSuggestedInterests] = useState<string[]>([]);
   const [showPricing, setShowPricing] = useState(false);
   const [subscription, setSubscription] = useState<"free" | "premium">("free");
   const [formData, setFormData] = useState<OnboardingData>({
@@ -69,7 +71,24 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
     setFormData(prev => ({ ...prev, hoursPerWeek: `${minHours}-${maxHours} hrs` }));
   }, [minHours, maxHours]);
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, 5));
+  const nextStep = async () => {
+    if (step === 2) {
+      setLoadingInterests(true);
+      setStep(3); // Move forward immediately for perceived speed
+      try {
+        const suggested = await suggestFocusAreas(formData.goal, formData.motivation);
+        if (suggested && suggested.length > 0) {
+          setSuggestedInterests(suggested);
+        }
+      } catch (error) {
+        console.error("Failed to suggest interests:", error);
+      } finally {
+        setLoadingInterests(false);
+      }
+    } else {
+      setStep((s) => Math.min(s + 1, 5));
+    }
+  };
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleFinish = async () => {
@@ -192,23 +211,30 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             </div>
             
             <div className="flex flex-wrap gap-2 justify-center">
-              {INTEREST_TAGS.map(tag => {
-                const isSelected = formData.interests.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => toggleInterest(tag)}
-                    className={cn(
-                      "px-4 py-2 rounded-full border-2 transition-all font-bold text-sm",
-                      isSelected
-                        ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
-                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary/40"
-                    )}
-                  >
-                    {tag}
-                  </button>
-                );
-              })}
+              {loadingInterests ? (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                  <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">Analyzing your path...</p>
+                </div>
+              ) : (
+                (suggestedInterests.length > 0 ? suggestedInterests : INTEREST_TAGS).map(tag => {
+                  const isSelected = formData.interests.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      onClick={() => toggleInterest(tag)}
+                      className={cn(
+                        "px-4 py-2 rounded-full border-2 transition-all font-bold text-sm",
+                        isSelected
+                          ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
+                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary/40"
+                      )}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })
+              )}
             </div>
 
             <div className="flex items-center gap-2 p-4 bg-primary/5 rounded-xl border border-primary/10">
@@ -418,7 +444,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen flex flex-col">
+    <div className="max-w-2xl mx-auto min-h-screen flex flex-col md:py-8">
       <div className="flex items-center p-6 justify-between sticky top-0 bg-transparent backdrop-blur-xl z-20">
         <div className="flex items-center gap-2">
           <div className="bg-primary p-1.5 rounded-lg text-white shadow-lg shadow-primary/20">

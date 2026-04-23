@@ -33,132 +33,163 @@ const ProfileView = ({ roadmap, user }: ProfileViewProps) => {
   ];
 
   return (
-    <div className="max-w-md mx-auto min-h-screen pb-24">
-      <div className="p-6 flex flex-col gap-8">
+    <div className="max-w-4xl mx-auto min-h-screen pb-24 px-4 md:px-8">
+      <div className="py-8 flex flex-col gap-10">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary p-1.5 rounded-lg text-white">
-              <Rocket size={18} strokeWidth={2.5} />
+        <div className="flex justify-between items-center bg-white/40 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-white/20">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary p-2 rounded-xl text-white shadow-lg shadow-primary/20">
+              <Rocket size={20} strokeWidth={2.5} />
             </div>
-            <h1 className="text-xl font-black tracking-tighter text-slate-900 dark:text-slate-100 italic">TRAJECTA</h1>
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter text-slate-900 dark:text-slate-100 italic">TRAJECTA</h1>
           </div>
-          <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
-            <Settings size={24} />
-          </button>
+          <div className="flex gap-2">
+            <button className="p-3 hover:bg-white/50 rounded-xl transition-colors shadow-sm">
+              <Users size={24} />
+            </button>
+            <button className="p-3 hover:bg-white/50 rounded-xl transition-colors shadow-sm">
+              <Settings size={24} />
+            </button>
+          </div>
         </div>
 
-        {/* User Info */}
-        <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-primary/20 to-accent-purple/20 flex items-center justify-center text-primary shadow-xl ring-4 ring-white dark:ring-slate-800">
-             <User size={40} strokeWidth={1.5} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none uppercase tracking-tight">{user.email.split('@')[0]}</h2>
-            <div className="flex items-center gap-2 mt-2">
-              <p className="text-primary font-black uppercase text-[10px] tracking-widest leading-none">{roadmap.goal}</p>
+        <div className="grid md:grid-cols-12 gap-8">
+          {/* Left Column: User Profile Details */}
+          <div className="md:col-span-5 space-y-6">
+            <Card className="p-8 flex flex-col items-center gap-6 rounded-[2.5rem] border-none bg-white shadow-xl">
+              <div className="w-28 h-28 rounded-[2.5rem] bg-gradient-to-br from-primary/20 to-accent-purple/20 flex items-center justify-center text-primary shadow-xl ring-8 ring-slate-50">
+                <div className="w-full h-full rounded-[2.5rem] overflow-hidden">
+                   <img 
+                     src={`https://picsum.photos/seed/${user.email}/200/200`} 
+                     alt="User" 
+                     className="w-full h-full object-cover" 
+                     referrerPolicy="no-referrer" 
+                   />
+                </div>
+              </div>
+              <div className="text-center">
+                <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight italic">{user.email.split('@')[0]}</h2>
+                <div className="flex items-center gap-2 justify-center mt-3">
+                  <p className="text-primary font-black uppercase text-[10px] tracking-widest leading-none px-3 py-1 bg-primary/5 rounded-full border border-primary/10">{roadmap.goal}</p>
+                </div>
+                <div className="flex items-center gap-1.5 mt-4 text-primary justify-center">
+                  <ShieldCheck size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Verified Trajecta Member</span>
+                </div>
+              </div>
+              
               <div className={cn(
-                "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest",
-                user.subscription === "premium" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-slate-100 text-slate-500"
+                "w-full px-6 py-4 rounded-2xl text-center text-xs font-black uppercase tracking-[0.2em] shadow-sm",
+                user.subscription === "premium" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-slate-50 text-slate-400"
               )}>
-                {user.subscription}
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 mt-2 text-primary">
-              <ShieldCheck size={14} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Verified Expert</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Premium Upsell for Free Users */}
-        {user.subscription === "free" && (
-          <Card className="p-6 bg-white/50 backdrop-blur-sm border-primary/20 border-2 border-dashed flex flex-col gap-4 rounded-3xl">
-            <div className="flex items-center gap-4">
-              <div className="bg-primary p-3 rounded-2xl text-white shadow-lg shadow-primary/20">
-                <Zap size={24} strokeWidth={2.5} />
-              </div>
-              <div className="flex-1">
-                <p className="text-base font-black uppercase tracking-tight">Unlock Everything</p>
-                <p className="text-xs text-slate-500 font-medium">Track multiple goals and get full roadmap access for only €2.99/mo</p>
-              </div>
-            </div>
-            <Button className="w-full h-12 rounded-xl text-sm font-black uppercase tracking-widest">Go Premium</Button>
-          </Card>
-        )}
-
-        {/* Career Readiness Score */}
-        <Card className="p-8 bg-gradient-to-br from-primary via-primary to-accent-purple text-white border-none shadow-2xl shadow-primary/30 rounded-[2.5rem]">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em]">Readiness Score</p>
-              <h3 className="text-6xl font-black mt-2 tracking-tighter">{roadmap.careerReadinessScore}%</h3>
-            </div>
-            <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-md">
-              <Award size={40} />
-            </div>
-          </div>
-          <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${roadmap.careerReadinessScore}%` }}
-              className="h-full bg-white"
-            />
-          </div>
-          <p className="text-xs font-medium mt-6 text-white/80 leading-relaxed uppercase tracking-wide">
-            You're in the top 15% of aspiring {roadmap.goal}s <br />Complete 3 more daily actions to level up.
-          </p>
-        </Card>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          {stats.map((stat) => (
-            <Card key={stat.label} className="p-4 flex flex-col items-center text-center gap-3 border-none bg-white shadow-lg shadow-slate-100 rounded-3xl">
-              <stat.icon size={20} className={stat.color} />
-              <div>
-                <p className="text-xl font-black leading-none">{stat.value}</p>
-                <p className="text-[9px] text-slate-400 mt-2 font-black uppercase tracking-widest leading-none">{stat.label}</p>
+                {user.subscription} Status
               </div>
             </Card>
-          ))}
-        </div>
 
-        {/* Professional Guidance */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-black uppercase text-xs tracking-widest text-slate-400">Collaborators</h3>
-            <button className="text-primary text-xs font-black uppercase tracking-widest">Connect</button>
+            {/* Premium Upsell for Free Users */}
+            {user.subscription === "free" && (
+              <Card className="p-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-none flex flex-col gap-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-700">
+                  <Zap size={120} strokeWidth={1} />
+                </div>
+                <div className="relative z-10 space-y-4">
+                  <div className="bg-primary p-3 rounded-2xl text-white w-fit shadow-lg shadow-primary/20">
+                    <Zap size={24} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <p className="text-xl font-black uppercase tracking-tight italic">Unlock Premium</p>
+                    <p className="text-sm text-slate-300 font-medium leading-relaxed mt-2">Scale your progress with unlimited roadmaps and expert guidance.</p>
+                  </div>
+                </div>
+                <Button className="w-full h-14 rounded-2xl text-sm font-black uppercase tracking-widest relative z-10 shadow-xl shadow-primary/20">Upgrade Now — €2.99</Button>
+              </Card>
+            )}
           </div>
-          <Card className="p-5 flex items-center gap-4 bg-white border-none shadow-lg shadow-slate-100 rounded-3xl hover:translate-y-[-2px] transition-all cursor-pointer">
-            <div className="w-12 h-12 rounded-2xl bg-accent-blue/20 flex items-center justify-center text-accent-blue">
-               <User size={24} strokeWidth={2.5} />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-black uppercase italic">Sarah Jenkins</p>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Expert Mentor</p>
-            </div>
-            <Button variant="secondary" size="sm" className="rounded-full px-4 text-[10px] font-black uppercase border-slate-100">Invite</Button>
-          </Card>
-        </div>
 
-        {/* Social Accountability */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-black uppercase text-xs tracking-widest text-slate-400">Community Activity</h3>
-            <Users size={20} className="text-slate-300" />
-          </div>
-          <div className="flex -space-x-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className={`w-11 h-11 rounded-2xl border-4 border-white dark:border-slate-800 flex items-center justify-center text-white text-xs font-black shadow-lg
-                ${i === 1 ? 'bg-primary' : i === 2 ? 'bg-accent-purple' : i === 3 ? 'bg-accent-blue' : i === 4 ? 'bg-accent-green' : 'bg-slate-400'}`}>
-                {String.fromCharCode(64 + i)}
+          {/* Right Column: Score & Community */}
+          <div className="md:col-span-7 space-y-8">
+            {/* Career Readiness Score */}
+            <Card className="p-10 bg-gradient-to-br from-primary via-primary to-accent-purple text-white border-none shadow-2xl shadow-primary/30 rounded-[3rem] relative overflow-hidden">
+               <div className="absolute -bottom-10 -right-10 p-10 opacity-10">
+                  <Award size={200} strokeWidth={1} />
+               </div>
+               <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
+                <div className="space-y-2">
+                  <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em]">Readiness Index</p>
+                  <h3 className="text-7xl font-black tracking-tighter">{roadmap.careerReadinessScore}<span className="text-3xl opacity-50">%</span></h3>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20">
+                  <Award size={64} strokeWidth={1.5} />
+                </div>
               </div>
-            ))}
-            <div className="w-11 h-11 rounded-2xl border-4 border-white dark:border-slate-800 bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-black">
-              +12
+              <div className="relative z-10 space-y-4">
+                <div className="h-3 bg-white/20 rounded-full overflow-hidden shadow-inner">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${roadmap.careerReadinessScore}%` }}
+                    className="h-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                  />
+                </div>
+                <p className="text-sm font-medium text-white/80 leading-relaxed uppercase tracking-widest italic">
+                  Level 4 / 15: Strategic Professional
+                </p>
+              </div>
+            </Card>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-4">
+              {stats.map((stat) => (
+                <Card key={stat.label} className="p-6 flex flex-col items-center text-center gap-3 border-none bg-white shadow-xl shadow-slate-100 rounded-3xl group hover:scale-105 transition-transform duration-300">
+                  <stat.icon size={28} className={cn(stat.color, "group-hover:scale-110 transition-transform")} />
+                  <div className="mt-2">
+                    <p className="text-2xl font-black leading-none italic">{stat.value}</p>
+                    <p className="text-[10px] text-slate-400 mt-3 font-black uppercase tracking-widest leading-none">{stat.label}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Collaborators & Community */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="font-black uppercase text-xs tracking-widest text-slate-400">Expert Mentor</h3>
+                <Card className="p-5 flex items-center gap-4 bg-white border-none shadow-lg shadow-slate-100 rounded-3xl transition-all cursor-pointer group">
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform">
+                     <img 
+                       src="https://picsum.photos/seed/sarah/100/100" 
+                       alt="Sarah Jenkins" 
+                       className="w-full h-full object-cover" 
+                       referrerPolicy="no-referrer" 
+                     />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="text-sm font-black uppercase italic truncate">Sarah Jenkins</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">Senior Advisor</p>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-black uppercase text-xs tracking-widest text-slate-400">Community</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex -space-x-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className={`w-12 h-12 rounded-2xl border-4 border-white dark:border-slate-800 overflow-hidden shadow-lg
+                        ${i === 1 ? 'bg-primary' : i === 2 ? 'bg-accent-purple' : i === 3 ? 'bg-accent-blue' : i === 4 ? 'bg-accent-green' : 'bg-slate-400'}`}>
+                        <img 
+                          src={`https://picsum.photos/seed/user${i}/100/100`} 
+                          alt="Community Member" 
+                          className="w-full h-full object-cover" 
+                          referrerPolicy="no-referrer" 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-xs font-black text-slate-400">+128</span>
+                </div>
+              </div>
             </div>
           </div>
-          <p className="text-xs text-slate-400 font-medium">5 colleagues are currently active. <span className="text-primary font-black uppercase tracking-widest">Sync progress</span></p>
         </div>
       </div>
 
