@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
-import { ArrowLeft, ArrowRight, Mic, Info, Upload, Link as LinkIcon, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mic, Info, Upload, Link as LinkIcon, Sparkles, Rocket } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { OnboardingData, UserRoadmap } from "../types";
 import { generateRoadmap } from "../services/gemini";
@@ -103,8 +103,8 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             className="flex flex-col gap-8"
           >
             <div className="relative">
-              <div className="absolute -top-4 right-4 opacity-20 w-24 h-24">
-                <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Mascot" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+              <div className="absolute -top-4 right-4 opacity-10 w-24 h-24 text-primary">
+                <Rocket size={80} strokeWidth={1} />
               </div>
               <h1 className="text-3xl font-black leading-tight pb-3">What's your big mission?</h1>
               <p className="text-slate-600 dark:text-slate-400">Not sure? Explore our inspirations below to find your path.</p>
@@ -157,8 +157,8 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             exit={{ opacity: 0, x: -20 }}
             className="flex flex-col gap-6"
           >
-            <div className="w-full aspect-[4/3] rounded-xl overflow-hidden flex items-center justify-center bg-primary/5">
-              <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Mascot" className="w-full h-full object-contain p-8" referrerPolicy="no-referrer" />
+            <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden flex items-center justify-center bg-primary/5 text-primary">
+              <Rocket size={120} strokeWidth={1.5} className="animate-bounce" />
             </div>
             <h3 className="text-2xl font-black text-center">Current Status Check</h3>
             <p className="text-slate-600 dark:text-slate-400 text-center">What's stopping you from reaching this goal today?</p>
@@ -183,8 +183,8 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             exit={{ opacity: 0, x: -20 }}
             className="flex flex-col gap-6"
           >
-            <div className="w-full aspect-[3/2] rounded-xl overflow-hidden bg-primary/5 flex items-center justify-center">
-              <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Mascot" className="h-full w-full object-contain p-6" referrerPolicy="no-referrer" />
+            <div className="w-full aspect-[3/2] rounded-3xl overflow-hidden bg-primary/5 flex items-center justify-center text-primary">
+              <Sparkles size={80} strokeWidth={1.5} className="animate-pulse" />
             </div>
             <div className="text-center">
               <h3 className="text-2xl font-black">Focus Areas</h3>
@@ -227,8 +227,10 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             exit={{ opacity: 0, x: -20 }}
             className="flex flex-col gap-6"
           >
-            <div className="flex justify-center">
-              <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Mascot" className="w-48 h-48 object-contain" referrerPolicy="no-referrer" />
+            <div className="flex justify-center py-8">
+              <div className="w-40 h-40 rounded-[2.5rem] bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center text-white shadow-2xl shadow-primary/20 rotate-12">
+                 <Rocket size={80} strokeWidth={1.5} />
+              </div>
             </div>
             <h1 className="text-3xl font-black text-center">Fuel for the journey</h1>
             <div className="space-y-8">
@@ -416,29 +418,34 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-background-light dark:bg-background-dark flex flex-col">
-      <div className="flex items-center p-4 pb-2 justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-20">
+    <div className="max-w-md mx-auto min-h-screen flex flex-col">
+      <div className="flex items-center p-6 justify-between sticky top-0 bg-transparent backdrop-blur-xl z-20">
         <div className="flex items-center gap-2">
-          <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Trajecta Logo" className="size-8 object-contain" referrerPolicy="no-referrer" />
-          <h2 className="text-lg font-black tracking-tighter text-primary">TRAJECTA</h2>
+          <div className="bg-primary p-1.5 rounded-lg text-white shadow-lg shadow-primary/20">
+            <Rocket size={18} strokeWidth={2.5} />
+          </div>
+          <h2 className="text-lg font-black tracking-tighter text-slate-900 dark:text-slate-100 italic">TRAJECTA</h2>
         </div>
-        <button onClick={prevStep} className="size-10 flex items-center justify-center rounded-full hover:bg-primary/10">
+        <button onClick={prevStep} className="size-10 flex items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
           <ArrowLeft size={20} />
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-col gap-4 px-6 pb-4">
         <div className="flex gap-6 justify-between items-end">
           <div>
-            <p className="text-base font-medium">Step {step}</p>
-            <p className="text-primary text-sm font-semibold uppercase tracking-wider">
-              {step === 1 ? "Defining your path" : step === 5 ? "Resume & Data" : "Personalization"}
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Step {step} of 5</p>
+            <p className="text-primary text-lg font-black uppercase tracking-tight mt-1">
+              {step === 1 ? "Defining your path" : step === 5 ? "Membership & Goal" : "Personalization"}
             </p>
           </div>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">{step} / 5</p>
         </div>
-        <div className="rounded-full bg-primary/20 h-2.5 w-full overflow-hidden">
-          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${step * 20}%` }}></div>
+        <div className="rounded-full bg-primary/10 h-2 w-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${step * 20}%` }}
+            className="h-full rounded-full bg-primary shadow-sm"
+          />
         </div>
       </div>
 

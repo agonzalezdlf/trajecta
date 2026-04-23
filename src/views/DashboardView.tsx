@@ -21,7 +21,9 @@ import {
   ShieldAlert,
   ShieldCheck,
   TrendingUp,
-  Sparkles
+  Sparkles,
+  Rocket,
+  User
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -39,17 +41,19 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
   const streak = roadmap.streak?.current || 0;
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-background-light dark:bg-background-dark pb-24">
+    <div className="max-w-md mx-auto min-h-screen pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-50 flex items-center bg-white/80 dark:bg-background-dark/80 backdrop-blur-md p-4 pb-2 justify-between border-b border-primary/10">
+      <div className="sticky top-0 z-50 flex items-center bg-white/40 dark:bg-black/40 backdrop-blur-xl p-4 pb-2 justify-between border-b border-white/20">
         <div className="flex items-center gap-2">
-          <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Trajecta Logo" className="size-8 object-contain" referrerPolicy="no-referrer" />
-          <h2 className="text-lg font-black tracking-tighter text-primary">TRAJECTA</h2>
+          <div className="bg-primary p-1.5 rounded-lg text-white">
+            <Rocket size={18} strokeWidth={2.5} />
+          </div>
+          <h2 className="text-lg font-black tracking-tighter text-slate-900 dark:text-slate-100 italic">TRAJECTA</h2>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-orange-100 dark:bg-orange-900/30 px-3 py-1.5 rounded-full border border-orange-200 dark:border-orange-800">
-            <Zap size={16} className="text-orange-500 fill-orange-500" />
-            <span className="text-sm font-black text-orange-600 dark:text-orange-400">{streak}</span>
+          <div className="flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
+            <Zap size={16} className="text-primary fill-primary" />
+            <span className="text-sm font-black text-primary">{streak}</span>
           </div>
           <button className="size-10 flex items-center justify-center rounded-full hover:bg-primary/10">
             <Info size={20} />
@@ -58,18 +62,21 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
       </div>
 
       {/* Profile Section */}
-      <div className="flex p-6 flex-col items-center gap-4">
+      <div className="flex p-8 flex-col items-center gap-6">
         <div className="relative">
-          <div className="w-24 h-24 rounded-full border-4 border-primary shadow-lg overflow-hidden bg-primary/5">
-            <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Profile" className="w-full h-full object-contain p-3" referrerPolicy="no-referrer" />
+          <div className="w-28 h-28 rounded-[2.5rem] bg-gradient-to-br from-primary/20 to-accent-purple/20 flex items-center justify-center text-primary shadow-xl ring-4 ring-white dark:ring-slate-800">
+             <User size={48} strokeWidth={1.5} />
           </div>
-          <div className="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-1 border-2 border-white dark:border-background-dark">
-            <Verified size={14} />
+          <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1.5 border-4 border-white dark:border-slate-800 shadow-lg">
+            <ShieldCheck size={16} />
           </div>
         </div>
         <div className="text-center">
-          <p className="text-xl font-bold">{user.email.split('@')[0]}</p>
-          <p className="text-primary font-semibold text-sm">Aspiring {roadmap.goal}</p>
+          <p className="text-2xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">{user.email.split('@')[0]}</p>
+          <div className="mt-1 flex items-center gap-2 justify-center">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <p className="text-primary font-black uppercase text-[10px] tracking-widest">{roadmap.goal}</p>
+          </div>
         </div>
       </div>
 

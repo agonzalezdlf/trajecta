@@ -4,11 +4,13 @@ import { cn } from "../lib/utils";
 
 export const Navbar = () => {
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+    <nav className="sticky top-0 z-50 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-b border-primary/10">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <img src="https://illustrations.popsy.co/white/launching-rocket.svg" alt="Trajecta Logo" className="size-8 object-contain" referrerPolicy="no-referrer" />
-          <span className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">Trajecta</span>
+          <div className="bg-primary p-2 rounded-xl text-white shadow-lg shadow-primary/20">
+            <Rocket size={20} strokeWidth={2.5} />
+          </div>
+          <span className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100 italic">TRAJECTA</span>
         </Link>
         <div className="flex items-center gap-4">
           <Link to="/login" className="text-sm font-bold hover:text-primary transition-colors">Login</Link>

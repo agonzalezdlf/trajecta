@@ -119,7 +119,7 @@ export default function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100">
+      <div className="min-h-screen grainy-bg font-sans text-slate-900 dark:text-slate-100">
         <Routes>
           <Route path="/" element={<LandingView />} />
           <Route 
