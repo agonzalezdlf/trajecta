@@ -103,9 +103,10 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
         ...formData 
       }, roadmap);
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to generate roadmap:", error);
-      alert("Something went wrong. Please try again.");
+      const errorMessage = error?.message || (typeof error === 'string' ? error : "Unknown error");
+      alert(`Something went wrong: ${errorMessage}\n\nPlease check your console for details.`);
     } finally {
       setLoading(false);
     }

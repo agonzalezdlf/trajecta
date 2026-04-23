@@ -16,9 +16,9 @@ When deploying to Vercel, you need to configure your Environment Variables:
 1. Go to your **Project Settings** in the Vercel Dashboard.
 2. Select **Environment Variables**.
 3. Add the following key:
-   - **Key**: `GEMINI_API_KEY`
-   - **Value**: Your Google Gemini API Key (get one at [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)).
-4. (Optional) For a production database, you might want to switch from SQLite to an external database like PostgreSQL, but for prototypes, SQLite is fine (note: Vercel's ephemeral filesystem means SQLite data will reset on every deploy).
+   - **Key**: `VITE_GEMINI_API_KEY` (The `VITE_` prefix is required for client-side access in Vite-based apps)
+   - **Value**: Your Google Gemini API Key.
+4. **Redeploy** your project to apply the changes.
 
 ### 3. Local Development
 

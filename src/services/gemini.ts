@@ -1,8 +1,23 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { OnboardingData, UserRoadmap } from "../types";
 
-const apiKey = process.env.GEMINI_API_KEY;
-const ai = new GoogleGenAI({ apiKey: apiKey || "" });
+const getApiKey = () => {
+  // 1. Try VITE_ prefix (Standard Vite/Vercel)
+  const viteKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (viteKey && viteKey !== "your_api_key_here") return viteKey;
+
+  // 2. Try process.env (AI Studio / Unified)
+  const processKey = (process.env as any).GEMINI_API_KEY;
+  if (processKey && processKey !== "MY_GEMINI_API_KEY") return processKey;
+
+  return "";
+};
+
+const apiKey = getApiKey();
+if (!apiKey) {
+  console.warn("GEMINI_API_KEY is not defined. If on Vercel, use VITE_GEMINI_API_KEY. If on AI Studio, ensure the secret is set.");
+}
+const ai = new GoogleGenAI({ apiKey });
 
 export async function generateRoadmap(data: OnboardingData): Promise<UserRoadmap> {
   const prompt = `
@@ -31,7 +46,7 @@ export async function generateRoadmap(data: OnboardingData): Promise<UserRoadmap
 
   try {
     const response = await ai.models.generateContent({
-      model: "models/gemini-3-flash-preview",
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -138,7 +153,12 @@ export async function generateRoadmap(data: OnboardingData): Promise<UserRoadmap
       }
     });
 
-    const roadmap = JSON.parse(response.text || "{}") as UserRoadmap;
+    let text = response.text || "{}";
+    // Clean up potential markdown blocks
+    if (text.includes("```")) {
+      text = text.replace(/```json\n?|```/g, "").trim();
+    }
+    const roadmap = JSON.parse(text) as UserRoadmap;
     
     // Ensure we have some default badges if none generated
     if (!roadmap.badges || roadmap.badges.length === 0) {
@@ -176,7 +196,7 @@ export async function suggestFocusAreas(goal: string, motivation: string): Promi
 
   try {
     const response = await ai.models.generateContent({
-      model: "models/gemini-3-flash-preview",
+      model: "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -189,7 +209,11 @@ export async function suggestFocusAreas(goal: string, motivation: string): Promi
       }
     });
 
-    return JSON.parse(response.text || "[]") as string[];
+    let text = response.text || "[]";
+    if (text.includes("```")) {
+      text = text.replace(/```json\n?|```/g, "").trim();
+    }
+    return JSON.parse(text) as string[];
   } catch (error) {
     console.error("Gemini API Error (suggestFocusAreas):", error);
     throw error;
