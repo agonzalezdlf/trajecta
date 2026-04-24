@@ -16,8 +16,9 @@ When deploying to Vercel, you need to configure your Environment Variables:
 1. Go to your **Project Settings** in the Vercel Dashboard.
 2. Select **Environment Variables**.
 3. Add the following key:
-   - **Key**: `VITE_GEMINI_API_KEY` (The `VITE_` prefix is required for client-side access in Vite-based apps)
+   - **Key**: `GEMINI_API_KEY`
    - **Value**: Your Google Gemini API Key.
+   - *Note: We use a server-side proxy to keep your key secure.*
 4. **Redeploy** your project to apply the changes.
 
 ### 3. Local Development
