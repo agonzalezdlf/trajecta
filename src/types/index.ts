@@ -14,6 +14,7 @@ export interface RoadmapModule {
   tasks: RoadmapTask[];
   completed: boolean;
   progress: number; // 0-100
+  type?: "video" | "reading" | "quiz" | "practice" | "milestone";
 }
 
 export interface RoadmapPhase {

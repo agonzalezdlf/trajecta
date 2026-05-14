@@ -3,6 +3,9 @@ import { UserRoadmap, RoadmapPhase, RoadmapModule, RoadmapTask } from "../types"
 import { BottomNav } from "../components/Navigation";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
+import RoadmapPath from "../components/RoadmapPath";
+import { generateModuleContent, ModuleContent } from "../services/gemini";
+import Markdown from "react-markdown";
 import { 
   Check, 
   Lock, 
@@ -23,7 +26,9 @@ import {
   TrendingUp,
   Sparkles,
   Rocket,
-  User
+  User,
+  Loader2,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -36,9 +41,36 @@ interface DashboardViewProps {
 
 const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) => {
   const [selectedModule, setSelectedModule] = useState<RoadmapModule | null>(null);
+  const [selectedTask, setSelectedTask] = useState<RoadmapTask | null>(null);
+  const [taskContent, setTaskContent] = useState<ModuleContent | null>(null);
+  const [loadingContent, setLoadingContent] = useState(false);
   const [showGapAnalysis, setShowGapAnalysis] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
 
   const streak = roadmap.streak?.current || 0;
+
+  const handleTaskClick = async (task: RoadmapTask) => {
+    setSelectedTask(task);
+    setLoadingContent(true);
+    setTaskContent(null);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+    
+    try {
+      const content = await generateModuleContent(task.title, task.description, roadmap.goal);
+      setTaskContent(content);
+    } catch (error) {
+      console.error("Error loading task content:", error);
+    } finally {
+      setLoadingContent(false);
+    }
+  };
+
+  const closeTaskModal = () => {
+    setSelectedTask(null);
+    setTaskContent(null);
+  };
 
   return (
     <div className="max-w-4xl mx-auto min-h-screen pb-24 px-4 md:px-8">
@@ -64,8 +96,39 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
       <div className="grid lg:grid-cols-12 gap-8">
         {/* Left Column: Profile & Summary */}
         <div className="lg:col-span-4 flex flex-col gap-6">
+          {/* Today's Focus Card */}
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="p-6 bg-gradient-to-br from-primary to-primary-dark text-white rounded-[2rem] border-none shadow-xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                 <Zap size={80} fill="white" />
+               </div>
+               <div className="relative z-10">
+                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60 mb-1">Today's Focus</p>
+                 <h4 className="text-xl font-black italic uppercase tracking-tight mb-4">Daily Momentum</h4>
+                 <div className="space-y-3">
+                   <div className="flex items-center gap-3 bg-white/10 p-3 rounded-2xl">
+                     <div className="bg-white text-primary rounded-lg p-1.5">
+                       <Rocket size={16} />
+                     </div>
+                     <span className="text-xs font-black uppercase tracking-tight">Complete 2 tasks</span>
+                   </div>
+                   <div className="flex items-center gap-3 bg-white/10 p-3 rounded-2xl">
+                     <div className="bg-white/20 text-white rounded-lg p-1.5">
+                       <Brain size={16} />
+                     </div>
+                     <span className="text-xs font-black uppercase tracking-tight opacity-70">Review Weak Skills</span>
+                   </div>
+                 </div>
+               </div>
+            </Card>
+          </motion.div>
+
           {/* Profile Section */}
-          <Card className="flex p-8 flex-col items-center gap-6 rounded-[2.5rem] border-none bg-white/50 backdrop-blur-sm shadow-xl">
+          <Card className="flex p-8 flex-col items-center gap-6 rounded-[2.5rem] border-none bg-white shadow-xl">
             <div className="relative">
               <div className="w-28 h-28 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-primary/20 to-accent-purple/20 shadow-xl ring-4 ring-white dark:ring-slate-800">
                  <img 
@@ -145,130 +208,21 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
 
         {/* Right Column: Roadmap Path */}
         <div className="lg:col-span-8">
-          <Card className="p-4 md:p-8 rounded-[2.5rem] border-none bg-white/30 backdrop-blur-sm shadow-xl min-h-600">
+          <Card className="p-4 md:p-8 rounded-[2.5rem] border-none bg-white shadow-xl min-h-[800px] overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+            
             <div className="flex flex-col items-center py-6 relative">
-              {/* Start Node */}
-              <div className="z-10 flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-lg ring-8 ring-primary/10">
-                  <Flag size={24} />
-                </div>
-                <span className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase mt-2">Mission Start</span>
+              <div className="flex flex-col items-center mb-12 text-center">
+                 <div className="bg-primary/10 text-primary px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+                   Your Path to {roadmap.goal}
+                 </div>
+                 <h3 className="text-3xl font-black italic tracking-tighter text-slate-900 uppercase">Learning Path</h3>
               </div>
 
-              {roadmap.phases.map((phase, phaseIdx) => (
-                <div key={phase.id} className="flex flex-col items-center w-full">
-                  {/* Path Line */}
-                  <div className={cn(
-                    "w-1.5 h-20 my-1",
-                    phase.status === "completed" ? "bg-primary" : 
-                    phase.status === "in_progress" ? "bg-gradient-to-b from-primary to-slate-100" : 
-                    "bg-slate-100"
-                  )} />
-
-                  {/* Phase Node container - responsive layout */}
-                  <div className="z-10 flex flex-col md:flex-row items-center gap-6 w-full px-4 md:px-12 max-w-2xl">
-                    <div className="shrink-0">
-                      {phase.status === "completed" ? (
-                        <div className="group relative">
-                          <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center text-white shadow-xl rotate-3 transform transition-transform group-hover:rotate-0">
-                            <MessageSquare size={36} className="-rotate-3 group-hover:rotate-0 transition-transform" />
-                          </div>
-                          <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-white">
-                            <Check size={16} strokeWidth={3} />
-                          </div>
-                        </div>
-                      ) : phase.status === "in_progress" ? (
-                        <div className="relative">
-                          <div className="w-24 h-24 rounded-full border-4 border-slate-100 flex items-center justify-center relative bg-white shadow-2xl">
-                            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                              <Brain size={40} />
-                            </div>
-                            <svg className="absolute inset-0 w-full h-full -rotate-90">
-                              <circle 
-                                cx="48" cy="48" r="46" 
-                                fill="transparent" 
-                                stroke="currentColor" 
-                                strokeWidth="4" 
-                                className="text-primary shadow-sm"
-                                strokeDasharray={2 * Math.PI * 46}
-                                strokeDashoffset={2 * Math.PI * 46 * (1 - 0.65)}
-                              />
-                            </svg>
-                          </div>
-                          <div className="absolute -bottom-2 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-lg left-1/2 -translate-x-1/2 whitespace-nowrap italic">
-                            Active
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-300 shadow-inner opacity-60">
-                          <Lock size={36} />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 text-center md:text-left">
-                      <p className={cn("font-black text-lg uppercase italic tracking-tight", phase.status === "locked" ? "text-slate-300" : "text-slate-900")}>
-                        {phase.title}
-                      </p>
-                      <div className="mt-1">
-                        {phase.status === "completed" && <p className="text-green-500 text-[10px] font-black uppercase tracking-widest">Mastery Achieved</p>}
-                        {phase.status === "in_progress" && <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">65% COMPLETE</p>}
-                        {phase.status === "locked" && <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">Awaiting Access</p>}
-                      </div>
-                      
-                      {/* Modules list integrated into the roadmap view on desktop */}
-                      {phase.status === "in_progress" && (
-                        <div className="mt-6 flex flex-col gap-3 w-full">
-                          {phase.modules.map(module => (
-                            <button 
-                              key={module.id}
-                              onClick={() => setSelectedModule(module)}
-                              className="flex items-center gap-4 p-4 bg-white/50 backdrop-blur-sm rounded-2xl border-none shadow-md hover:shadow-lg transition-all group w-full"
-                            >
-                              <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
-                                module.completed ? "bg-green-100 text-green-600" : "bg-primary text-white"
-                              )}>
-                                {module.completed ? <Check size={20} /> : <PlayCircle size={20} />}
-                              </div>
-                              <div className="flex-1 overflow-hidden">
-                                <p className="text-xs font-black uppercase tracking-tight truncate">{module.title}</p>
-                                <div className="flex items-center gap-3 mt-1.5 text-slate-400">
-                                   <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
-                                      <div className="h-full bg-primary" style={{ width: `${module.progress}%` }} />
-                                   </div>
-                                   <span className="text-[10px] font-black truncate">{module.progress}%</span>
-                                </div>
-                              </div>
-                              <ChevronRight size={18} className="text-slate-300 group-hover:text-primary transition-colors" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {/* Goal Node */}
-              <div className="z-10 flex flex-col items-center gap-4 py-16">
-                <div className="w-1.5 h-20 bg-slate-100 mb-2" />
-                <div className="w-28 h-28 rounded-full border-4 border-dashed border-primary/20 flex items-center justify-center bg-white relative shadow-2xl">
-                  <Star size={48} className="text-primary/10" />
-                  <div className="absolute -top-6">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <Star size={40} className="text-primary fill-primary shadow-xl" />
-                    </motion.div>
-                  </div>
-                </div>
-                <div className="text-center mt-4">
-                  <h3 className="text-primary font-black text-2xl tracking-tighter uppercase italic">{roadmap.goal}</h3>
-                  <p className="text-slate-400 text-xs font-black uppercase tracking-widest mt-2">Target reached: Oct 2024</p>
-                </div>
-              </div>
+              <RoadmapPath 
+                phases={roadmap.phases} 
+                onModuleClick={(mod) => setSelectedModule(mod)} 
+              />
             </div>
           </Card>
         </div>
@@ -299,15 +253,16 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
                 {selectedModule.tasks.map((task, taskIdx) => (
                   <div 
                     key={task.id} 
+                    onClick={() => handleTaskClick(task)}
                     className={cn(
-                      "flex items-center gap-4 p-4 rounded-2xl border transition-all",
-                      task.completed ? "bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800" : "bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800",
+                      "flex items-center gap-4 p-4 rounded-2xl border transition-all cursor-pointer group/task relative",
+                      task.completed ? "bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800" : "bg-white dark:bg-slate-800 shadow-sm border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:shadow-md",
                       user.subscription === "free" && taskIdx > 0 && "opacity-40 grayscale blur-[1px] pointer-events-none"
                     )}
                   >
                     <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center",
-                      task.completed ? "bg-green-100 text-green-600" : "bg-white dark:bg-slate-700 shadow-sm text-slate-400"
+                      "w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover/task:scale-110",
+                      task.completed ? "bg-green-100 text-green-600" : "bg-primary/5 text-primary"
                     )}>
                       {task.type === "lesson" && <PlayCircle size={20} />}
                       {task.type === "exercise" && <Brain size={20} />}
@@ -321,15 +276,12 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
                     {user.subscription === "free" && taskIdx > 0 ? (
                       <Lock size={16} className="text-slate-400" />
                     ) : (
-                      <button 
-                        onClick={() => onTaskComplete(task.id)}
-                        className={cn(
-                          "size-6 rounded-full border-2 flex items-center justify-center transition-all",
-                          task.completed ? "bg-green-500 border-green-500 text-white" : "border-slate-300 dark:border-slate-600"
-                        )}
-                      >
+                      <div className={cn(
+                        "size-6 rounded-full border-2 flex items-center justify-center transition-all",
+                        task.completed ? "bg-green-500 border-green-500 text-white" : "border-slate-300 dark:border-slate-600"
+                      )}>
                         {task.completed && <Check size={14} strokeWidth={4} />}
-                      </button>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -342,6 +294,134 @@ const DashboardView = ({ roadmap, user, onTaskComplete }: DashboardViewProps) =>
               </div>
 
               <Button className="w-full h-14 text-lg" onClick={() => setSelectedModule(null)}>Continue Learning</Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Task Content Modal */}
+      <AnimatePresence>
+        {selectedTask && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-xl text-primary">
+                    {selectedTask.type === "lesson" && <PlayCircle size={20} />}
+                    {selectedTask.type === "exercise" && <Brain size={20} />}
+                    {selectedTask.type === "quiz" && <HelpCircle size={20} />}
+                    {selectedTask.type === "action" && <FileText size={20} />}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black tracking-tight">{selectedTask.title}</h3>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary italic">Daily Mission</p>
+                  </div>
+                </div>
+                <button onClick={closeTaskModal} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-8 overflow-y-auto flex-1">
+                {loadingContent ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 size={48} className="text-primary animate-spin" />
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Generating Content...</p>
+                  </div>
+                ) : taskContent ? (
+                  <div className="prose prose-slate dark:prose-invert max-w-none">
+                    {taskContent.type === "lesson" ? (
+                      <div className="markdown-body">
+                        <Markdown>{taskContent.body}</Markdown>
+                      </div>
+                    ) : (
+                      <div className="space-y-8">
+                        {taskContent.quiz?.map((q, idx) => (
+                          <div key={idx} className="space-y-4">
+                            <h4 className="text-lg font-bold flex gap-3">
+                              <span className="text-primary">{idx + 1}.</span>
+                              {q.question}
+                            </h4>
+                            <div className="grid grid-cols-1 gap-3 ml-7">
+                              {q.options.map((opt, optIdx) => (
+                                <button
+                                  key={optIdx}
+                                  disabled={quizSubmitted}
+                                  onClick={() => setQuizAnswers(prev => ({ ...prev, [idx]: optIdx }))}
+                                  className={cn(
+                                    "p-4 rounded-xl border-2 text-left transition-all font-medium text-sm",
+                                    quizAnswers[idx] === optIdx
+                                      ? quizSubmitted
+                                        ? optIdx === q.correctAnswer
+                                          ? "border-green-500 bg-green-50 text-green-700"
+                                          : "border-red-500 bg-red-50 text-red-700"
+                                        : "border-primary bg-primary/5 text-primary ring-2 ring-primary/20"
+                                      : quizSubmitted && optIdx === q.correctAnswer
+                                        ? "border-green-500 bg-green-50 text-green-700"
+                                        : "border-slate-100 dark:border-slate-800 hover:border-slate-200"
+                                  )}
+                                >
+                                  {opt}
+                                </button>
+                              ))}
+                            </div>
+                            {quizSubmitted && (
+                              <div className={cn(
+                                "ml-7 p-4 rounded-xl text-xs font-medium leading-relaxed",
+                                quizAnswers[idx] === q.correctAnswer ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                              )}>
+                                <span className="font-bold uppercase tracking-wider block mb-1">
+                                  {quizAnswers[idx] === q.correctAnswer ? "Correct!" : "Mistake"}
+                                </span>
+                                {q.explanation}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-20 flex flex-col items-center gap-4">
+                    <ShieldAlert size={48} className="text-slate-300" />
+                    <p className="text-slate-500">Failed to load content. Please try again.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sticky bottom-0">
+                {!loadingContent && taskContent && (
+                  <>
+                    {taskContent.type === "quiz" && !quizSubmitted ? (
+                      <Button 
+                        className="w-full h-14" 
+                        disabled={Object.keys(quizAnswers).length < (taskContent.quiz?.length || 0)}
+                        onClick={() => setQuizSubmitted(true)}
+                      >
+                        Submit Quiz
+                      </Button>
+                    ) : (
+                      <Button 
+                        className="w-full h-14 gap-2" 
+                        onClick={() => {
+                          onTaskComplete(selectedTask.id);
+                          closeTaskModal();
+                        }}
+                      >
+                        Complete Lesson <Zap size={20} className="fill-white" />
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </motion.div>
           </div>
         )}

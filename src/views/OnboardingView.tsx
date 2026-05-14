@@ -72,13 +72,17 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
   }, [minHours, maxHours]);
 
   const nextStep = async () => {
-    if (step === 2) {
+    if (step === 3) {
       setLoadingInterests(true);
-      setStep(3); // Move forward immediately for perceived speed
+      setStep(4);
       try {
         const suggested = await suggestFocusAreas(formData.goal, formData.motivation);
         if (suggested && suggested.length > 0) {
           setSuggestedInterests(suggested);
+          setFormData(prev => ({
+            ...prev,
+            interests: [...new Set([...prev.interests, ...suggested.slice(0, 3)])]
+          }));
         }
       } catch (error) {
         console.error("Failed to suggest interests:", error);
@@ -86,7 +90,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
         setLoadingInterests(false);
       }
     } else {
-      setStep((s) => Math.min(s + 1, 5));
+      setStep((s) => Math.min(s + 1, 6));
     }
   };
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
@@ -95,13 +99,20 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
     setLoading(true);
     try {
       const roadmap = await generateRoadmap(formData);
-      onComplete({ 
+      const userData = { 
+        userId: "agonzalezdlf26", // Prototype fixed ID
         email: "agonzalezdlf26@gmail.com", 
         subscription,
+        goal: formData.goal,
+        onboardingData: formData 
+      };
+
+      onComplete({ 
+        ...userData,
         goals: [formData.goal],
-        joinedAt: new Date().toISOString(),
-        ...formData 
+        joinedAt: new Date().toISOString()
       }, roadmap);
+      
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Failed to generate roadmap:", error);
@@ -180,7 +191,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             <div className="w-full aspect-[4/3] rounded-3xl overflow-hidden flex items-center justify-center bg-primary/5 text-primary">
               <Rocket size={120} strokeWidth={1.5} className="animate-bounce" />
             </div>
-            <h3 className="text-2xl font-black text-center">Current Status Check</h3>
+            <h3 className="text-2xl font-black text-center">Current Status</h3>
             <p className="text-slate-600 dark:text-slate-400 text-center">What's stopping you from reaching this goal today?</p>
             <textarea 
               className="w-full p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-primary focus:ring-0"
@@ -189,13 +200,49 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
               value={formData.motivation}
               onChange={(e) => setFormData({ ...formData, motivation: e.target.value })}
             />
-            <div className="flex items-start gap-2 text-slate-500 text-sm">
-              <Info size={16} className="mt-0.5" />
-              <p>Your response helps our AI customize your Trajecta dashboard.</p>
-            </div>
           </motion.div>
         );
       case 3:
+        return (
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="flex flex-col gap-8"
+          >
+            <div className="text-center">
+              <h3 className="text-2xl font-black">Experience Level</h3>
+              <p className="text-slate-600 dark:text-slate-400">Where are you starting from on this journey?</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { id: "Beginner", label: "Complete Beginner", desc: "I'm just starting out or exploring." },
+                { id: "Intermediate", label: "Intermediate", desc: "I have some experience and solid foundations." },
+                { id: "Advanced", label: "Advanced / Expert", desc: "I'm looking to master specific high-level skills." }
+              ].map((level) => (
+                <button
+                  key={level.id}
+                  onClick={() => setFormData({ ...formData, skillLevel: level.id as any })}
+                  className={cn(
+                    "p-6 rounded-2xl border-2 text-left transition-all group",
+                    formData.skillLevel === level.id
+                      ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                      : "border-slate-100 dark:border-slate-800 hover:border-primary/20"
+                  )}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className={cn("font-black tracking-tight", formData.skillLevel === level.id ? "text-primary" : "text-slate-900 dark:text-white")}>
+                      {level.label}
+                    </span>
+                    {formData.skillLevel === level.id && <Sparkles size={16} className="text-primary" />}
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{level.desc}</p>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        );
+      case 4:
         return (
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -208,7 +255,11 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             </div>
             <div className="text-center">
               <h3 className="text-2xl font-black">Focus Areas</h3>
-              <p className="text-slate-600 dark:text-slate-400">What specific areas should we prioritize in your roadmap?</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                {suggestedInterests.length > 0 
+                  ? "Choose the ones you would like to focus on:" 
+                  : "Pick the skills you want to prioritize in your roadmap:"}
+              </p>
             </div>
             
             <div className="flex flex-wrap gap-2 justify-center">
@@ -218,23 +269,39 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
                   <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">Analyzing your path...</p>
                 </div>
               ) : (
-                (suggestedInterests.length > 0 ? suggestedInterests : INTEREST_TAGS).map(tag => {
-                  const isSelected = formData.interests.includes(tag);
-                  return (
-                    <button
-                      key={tag}
-                      onClick={() => toggleInterest(tag)}
-                      className={cn(
-                        "px-4 py-2 rounded-full border-2 transition-all font-bold text-sm",
-                        isSelected
-                          ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
-                          : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary/40"
-                      )}
+                <>
+                  {(suggestedInterests.length > 0 ? suggestedInterests : INTEREST_TAGS).map((tag, idx) => {
+                    const isSelected = formData.interests.includes(tag);
+                    const isSuggested = suggestedInterests.length > 0;
+                    return (
+                      <button
+                        key={tag}
+                        onClick={() => toggleInterest(tag)}
+                        className={cn(
+                          "px-4 py-2 rounded-full border-2 transition-all font-bold text-sm relative group",
+                          isSelected
+                            ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
+                            : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-primary/40"
+                        )}
+                      >
+                        {isSuggested && idx < 3 && !isSelected && (
+                          <div className="absolute -top-2 -right-1 bg-accent-purple text-white text-[8px] px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">
+                            Pick
+                          </div>
+                        )}
+                        {tag}
+                      </button>
+                    );
+                  })}
+                  {suggestedInterests.length > 0 && (
+                    <button 
+                      onClick={() => setSuggestedInterests([])}
+                      className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary mt-2 flex items-center gap-1"
                     >
-                      {tag}
+                      <Info size={12} /> General categories
                     </button>
-                  );
-                })
+                  )}
+                </>
               )}
             </div>
 
@@ -246,7 +313,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             </div>
           </motion.div>
         );
-      case 4:
+      case 5:
         return (
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -286,7 +353,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
                       className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary"
                     />
                   </div>
-
+ 
                   <div className="space-y-2">
                     <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       <span>Maximum Hours</span>
@@ -307,7 +374,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
                   </div>
                 </div>
               </div>
-
+ 
               <div className="space-y-4">
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Target Timeline</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -327,7 +394,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
                   ))}
                 </div>
               </div>
-
+ 
               <div className="space-y-3">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quick Presets</span>
                 <div className="grid grid-cols-3 gap-2">
@@ -357,7 +424,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
             </div>
           </motion.div>
         );
-      case 5:
+      case 6:
         return (
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
@@ -369,7 +436,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
               <h2 className="text-3xl font-black leading-tight pb-2">Choose your fuel</h2>
               <p className="text-slate-600 dark:text-slate-400">Unlock your full potential with Trajecta Premium.</p>
             </div>
-
+ 
             <div className="space-y-4">
               <Card 
                 className={cn(
@@ -394,7 +461,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
                   </li>
                 </ul>
               </Card>
-
+ 
               <Card 
                 className={cn(
                   "p-5 cursor-pointer border-2 transition-all relative overflow-hidden",
@@ -461,16 +528,16 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
       <div className="flex flex-col gap-4 px-6 pb-4">
         <div className="flex gap-6 justify-between items-end">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Step {step} of 5</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Step {step} of 6</p>
             <p className="text-primary text-lg font-black uppercase tracking-tight mt-1">
-              {step === 1 ? "Defining your path" : step === 5 ? "Membership & Goal" : "Personalization"}
+              {step === 1 ? "Defining your path" : step === 6 ? "Membership & Goal" : "Personalization"}
             </p>
           </div>
         </div>
         <div className="rounded-full bg-primary/10 h-2 w-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
-            animate={{ width: `${step * 20}%` }}
+            animate={{ width: `${step * 16.66}%` }}
             className="h-full rounded-full bg-primary shadow-sm"
           />
         </div>
@@ -485,7 +552,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
       <div className="p-4 bg-background-light dark:bg-background-dark border-t border-primary/10 mt-auto">
         <div className="flex flex-col gap-3">
           <Button 
-            onClick={step === 5 ? handleFinish : nextStep} 
+            onClick={step === 6 ? handleFinish : nextStep} 
             disabled={loading || (step === 1 && !formData.goal)}
             className="w-full h-14 text-lg gap-2"
           >
@@ -496,8 +563,8 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
               </div>
             ) : (
               <>
-                {step === 5 ? "Finish & Generate Roadmap" : "Next Step"}
-                {step === 5 ? <Sparkles size={20} /> : <ArrowRight size={20} />}
+                {step === 6 ? "Finish & Generate Roadmap" : "Next Step"}
+                {step === 6 ? <Sparkles size={20} /> : <ArrowRight size={20} />}
               </>
             )}
           </Button>
